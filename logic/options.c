@@ -63,6 +63,10 @@ options_parse(
             verbose = MSG_MACHINE;
             break;
 
+        case OPTION_JSON:
+            verbose = MSG_JSON;
+            break;
+
         case OPTION_DEVICE:
             sscanf( optarg, "%hhd", device_number );
             break;

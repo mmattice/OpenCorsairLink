@@ -130,6 +130,7 @@ enum {
   OPTION_FAN,
   OPTION_LED,
   OPTION_PUMP,
+  OPTION_JSON,
 };
 
 static struct option long_options[] = {
@@ -138,6 +139,7 @@ static struct option long_options[] = {
     {"debug", no_argument, 0, OPTION_DEBUG},
     {"dump", no_argument, 0, OPTION_DUMP},
     {"machine", no_argument, 0, OPTION_MACHINE},
+    {"json", no_argument, 0, OPTION_JSON},
     {"device", required_argument, 0, OPTION_DEVICE},
     {"led", required_argument, 0, OPTION_LED},
     {"fan", required_argument, 0, OPTION_FAN},

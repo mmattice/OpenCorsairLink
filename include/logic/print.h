@@ -26,10 +26,11 @@ enum msglevel
     MSG_ERROR = 1,
     MSG_WARN = 2,
     MSG_MACHINE = 3,
-    MSG_INFO = 4,
-    MSG_DEBUG = 5,
-    MSG_DEBUG2 = 6,
-    MSG_SPEW = 7,
+    MSG_JSON = 4,
+    MSG_INFO = 5,
+    MSG_DEBUG = 6,
+    MSG_DEBUG2 = 7,
+    MSG_SPEW = 8,
 };
 
 extern uint8_t verbose;

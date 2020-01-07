@@ -45,6 +45,16 @@ print( enum msglevel level, const char* fmt, ... )
             fflush( output_type );
         }
     }
+    else if ( level == MSG_JSON )
+    {
+        if ( verbose == MSG_JSON )
+        {
+            va_start( ap, fmt );
+            ret = vfprintf( output_type, fmt, ap );
+            va_end( ap );
+            fflush( output_type );
+        }
+    }
     else if ( level <= verbose )
     {
         va_start( ap, fmt );
