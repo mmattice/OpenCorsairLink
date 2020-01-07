@@ -59,6 +59,8 @@ psu_settings(
     struct option_flags flags,
     struct option_parse_return settings );
 
+void output_data(int8_t device_number, struct option_flags *flags, struct option_parse_return *settings);
+
 int
 main( int argc, char* argv[] )
 {
@@ -97,30 +99,43 @@ main( int argc, char* argv[] )
         }
         else
         {
-            if ( scanlist[device_number].device->driver == &corsairlink_driver_rmi )
-            {
-                psu_settings( scanlist[device_number], flags, settings );
-            }
-            else if ( scanlist[device_number].device->driver == &corsairlink_driver_commanderpro )
-            {
-                commanderpro_settings( scanlist[device_number], flags, settings );
-            }
-            else if ( scanlist[device_number].device->driver == &corsairlink_driver_asetek )
-            {
-                hydro_asetek_settings( scanlist[device_number], flags, settings );
-            }
-            else if ( scanlist[device_number].device->driver == &corsairlink_driver_asetekpro )
-            {
-                hydro_asetekpro_settings( scanlist[device_number], flags, settings );
-            }
-            else if ( scanlist[device_number].device->driver == &corsairlink_driver_coolit )
-            {
-                hydro_coolit_settings( scanlist[device_number], flags, settings );
-            }
+            output_data(device_number, &flags, &settings);
         }
+    } else if (verbose == MSG_JSON) {
+        msg_json("{ \n");
+        for (device_number = 0; device_number < scanlist_count; device_number++) {
+            msg_json( "  \"%d\": ", device_number);
+            output_data(device_number, &flags, &settings);
+            if (device_number < (scanlist_count-1))
+                msg_json(",\n");
+        }
+        msg_json("} \n");
     }
 
 exit:
     corsairlink_close( context );
     return 0;
+}
+
+void output_data(int8_t device_number, struct option_flags *flags, struct option_parse_return *settings) {
+    if (scanlist[device_number].device->driver == &corsairlink_driver_rmi )
+    {
+        psu_settings(scanlist[device_number], (*flags), (*settings) );
+    }
+    else if ( scanlist[device_number].device->driver == &corsairlink_driver_commanderpro )
+    {
+        commanderpro_settings(scanlist[device_number], (*flags), (*settings) );
+    }
+    else if ( scanlist[device_number].device->driver == &corsairlink_driver_asetek )
+    {
+        hydro_asetek_settings(scanlist[device_number], (*flags), (*settings) );
+    }
+    else if ( scanlist[device_number].device->driver == &corsairlink_driver_asetekpro )
+    {
+        hydro_asetekpro_settings(scanlist[device_number], (*flags), (*settings) );
+    }
+    else if ( scanlist[device_number].device->driver == &corsairlink_driver_coolit )
+    {
+        hydro_coolit_settings(scanlist[device_number], (*flags), (*settings) );
+    }
 }
