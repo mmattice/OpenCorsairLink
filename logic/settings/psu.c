@@ -55,53 +55,81 @@ psu_settings(
     rr = dev->driver->name( dev, handle, name, sizeof( name ) );
     rr = dev->driver->vendor( dev, handle, name, sizeof( name ) );
     msg_info( "Vendor: %s\n", name );
+    msg_json( "{\n  \"type\": \"psu\", \n  \"vendor\": \"%s\",\n", name);
     rr = dev->driver->product( dev, handle, name, sizeof( name ) );
     msg_info( "Product: %s\n", name );
+    msg_json( "  \"product\": \"%s\",\n", name);
     rr = dev->driver->fw_version( dev, handle, name, sizeof( name ) );
     msg_info( "Firmware: %s\n", name );
+    msg_json( "  \"firmware\": \"%s\",\n", name);
     msg_debug( "DEBUG: string done\n" );
 
     /* fetch temperatures */
+    msg_json( "  \"temperature\": {\n");
     for ( ii = 0; ii < 2; ii++ )
     {
         rr = dev->driver->temperature.read( dev, handle, ii, &temperature );
         msg_info( "Temperature %d: %5.2f C\n", ii, temperature );
+        msg_json( "    \"%d\": %5.2f", ii, temperature);
+        if ( ii != 1 )
+            msg_json(",");
+        msg_json("\n");
     }
+    msg_json( "  },\n");
 
     /* fetch device powered time and device uptime */
     rr = dev->driver->psu_time.powered( dev, handle, &time );
     msg_info( "Powered: %u (%dd.  %dh)\n", time, time / ( 24 * 60 * 60 ), time / ( 60 * 60 ) % 24 );
+    msg_json( "  \"powered\": %u,\n", time);
     rr = dev->driver->psu_time.uptime( dev, handle, &time );
     msg_info( "Uptime: %u (%dd.  %dh)\n", time, time / ( 24 * 60 * 60 ), time / ( 60 * 60 ) % 24 );
+    msg_json( "  \"uptime\": %u,\n", time);
     msg_debug( "DEBUG: time done\n" );
 
     /* fetch Supply Voltage and Total Watts Consumming */
     rr = dev->driver->power.supply_voltage( dev, handle, &supply_volts );
     msg_info( "Supply Voltage: %5.2f V\n", supply_volts );
+    msg_json( "  \"supply voltage\": %5.2f,\n", supply_volts);
     rr = dev->driver->power.total_wattage( dev, handle, &supply_watts );
     msg_info( "Total Watts: %5.2f W\n", supply_watts );
+    msg_json( "  \"total watts\": %5.2f,\n", supply_watts);
     msg_debug( "DEBUG: supply done\n" );
 
+    msg_json( "  \"output\": {\n");
     /* fetch PSU output */
     for ( ii = 0; ii < 3; ii++ )
     {
-        if ( ii == 0 )
+        if ( ii == 0 ) {
             msg_info( "Output 12v:\n" );
-        if ( ii == 1 )
-            msg_info( "Output 5v:\n" );
-        if ( ii == 2 )
-            msg_info( "Output 3.3v:\n" );
+            msg_json( "    \"12\": {\n");
+        }
+        if ( ii == 1 ) {
+            msg_info("Output 5v:\n");
+            msg_json( "    \"5\": {\n");
+        }
+        if ( ii == 2 ) {
+            msg_info("Output 3.3v:\n");
+            msg_json( "    \"3.3\": {\n");
+        }
 
         rr = dev->driver->power.sensor_select( dev, handle, ii );
         rr = dev->driver->power.voltage( dev, handle, ii, &output_volts );
         msg_info( "\tVoltage %5.2f V\n", output_volts );
+        msg_json( "      \"volts\": %5.2f,\n", output_volts);
 
         rr = dev->driver->power.amperage( dev, handle, ii, &output_amps );
         msg_info( "\tAmps %5.2f A\n", output_amps );
+        msg_json( "      \"amps\": %5.2f,\n", output_amps);
 
         rr = dev->driver->power.wattage( dev, handle, ii, &output_watts );
         msg_info( "\tWatts %5.2f W\n", output_watts );
+        msg_json( "      \"watts\": %5.2f\n", output_watts);
+        msg_json( "      }");
+        if ( ii != 2 )
+            msg_json( ",");
+        msg_json("\n");
     }
+    msg_json( "  }\n}\n");
     rr = dev->driver->power.sensor_select( dev, handle, 0 );
 
     rr = dev->lowlevel->deinit( handle, dev->write_endpoint );

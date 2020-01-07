@@ -48,5 +48,6 @@ dump_packet( uint8_t* packet, int size );
 #define msg_spew( ... ) print( MSG_SPEW, __VA_ARGS__ )
 
 #define msg_machine( ... ) print( MSG_MACHINE, __VA_ARGS__ )
+#define msg_json( ... ) print( MSG_JSON, __VA_ARGS__ )
 
 #endif
