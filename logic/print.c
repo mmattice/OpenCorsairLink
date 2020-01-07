@@ -32,7 +32,7 @@ print( enum msglevel level, const char* fmt, ... )
     int ret = 0;
     FILE* output_type = stdout;
 
-    if ( level < MSG_INFO )
+    if ( level < MSG_MACHINE )
         output_type = stderr;
 
     if ( level == MSG_MACHINE )

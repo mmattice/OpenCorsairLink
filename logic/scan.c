@@ -125,7 +125,7 @@ corsairlink_device_scanner( libusb_context* context, int* _scanlist_count )
                          * of the device connections
                          */
                         scanlist[scanlist_count].device = device;
-                        msg_info(
+                        msg_warn(
                             "Dev=%d, CorsairLink Device Found: %s!\n", scanlist_count,
                             device->name );
                         scanlist_count++;
@@ -146,7 +146,7 @@ corsairlink_device_scanner( libusb_context* context, int* _scanlist_count )
             }
         }
     }
-    msg_info( "\n" );
+    msg_warn( "\n" );
     *_scanlist_count = scanlist_count;
     /* End: scan code */
 
