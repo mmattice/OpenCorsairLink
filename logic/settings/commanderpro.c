@@ -56,38 +56,59 @@ commanderpro_settings(
     rr = dev->driver->name( dev, handle, name, sizeof( name ) );
     rr = dev->driver->vendor( dev, handle, name, sizeof( name ) );
     msg_info( "Vendor: %s\n", name );
+    msg_json( "{\n  \"type\": \"commanderpro\", \n  \"vendor\": \"%s\",\n", name);
     rr = dev->driver->product( dev, handle, name, sizeof( name ) );
     msg_info( "Product: %s\n", name );
+    msg_json( "  \"product\": \"%s\",\n", name);
     rr = dev->driver->fw_version( dev, handle, name, sizeof( name ) );
     msg_info( "Firmware: %s\n", name );
+    msg_json( "  \"firmware\": \"%s\",\n", name);
     msg_debug( "DEBUG: string done\n" );
 
     /* fetch temperatures */
+    msg_json( "  \"temperature\": {\n");
     for ( ii = 0; ii < 4; ii++ )
     {
         // char temperature[16];
         double temperature;
         rr = dev->driver->temperature.read( dev, handle, ii, &temperature );
         msg_info( "Temperature %d: %5.2f C\n", ii, temperature );
+        msg_json( "    \"%d\": %5.2f", ii, temperature);
+        if ( ii != 3 )
+            msg_json(",");
+        msg_json("\n");
     }
+    msg_json( "  },\n");
 
+    msg_json( "  \"sata voltages\": {\n");
     /* fetch SATA voltages */
     for ( ii = 0; ii < 3; ii++ )
     {
-        if ( ii == 0 )
-            msg_info( "Output 12v: " );
-        if ( ii == 1 )
-            msg_info( "Output 5v: " );
-        if ( ii == 2 )
-            msg_info( "Output 3.3v: " );
+        if ( ii == 0 ) {
+            msg_info("Output 12v: ");
+            msg_json("\"12\":");
+        }
+        if ( ii == 1 ) {
+            msg_info("Output 5v: ");
+            msg_json("\"5\":");
+        }
+        if ( ii == 2 ) {
+            msg_info("Output 3.3v: ");
+            msg_json("\"3.3\":");
+        }
 
         rr = dev->driver->power.voltage( dev, handle, ii, &output_volts );
         msg_info( "%5.2f V\n", output_volts );
+        msg_json( "%5.2f", output_volts);
+        if ( ii < 2 ) msg_json(",");
+        msg_json("\n");
     }
+    msg_json( "  },\n");
 
     /* get number of fans */
     rr = dev->driver->fan.count( dev, handle, &readings.fan_ctrl );
 
+    msg_json( "  \"fans\": {");
     for ( ii = 0; ii < readings.fan_ctrl.fan_count; ii++ )
     {
         readings.fan_ctrl.channel = (uint8_t) ii;
@@ -101,7 +122,14 @@ commanderpro_settings(
         msg_info(
                 "\tPWM: %i%%\n\tRPM: %i\n", readings.fan_ctrl.speed_pwm,
 				readings.fan_ctrl.speed_rpm );
+        msg_json( "    \"%d\": { \"mode\": \"%s\", \"PWM\": %i, \"RPM\": %i } ",
+                ii, readings.fan_ctrl.mode_string, readings.fan_ctrl.speed_pwm,
+                  readings.fan_ctrl.speed_rpm);
+        if ( ii != (readings.fan_ctrl.fan_count-1)) msg_json(",");
+        msg_json("\n");
     }
+    msg_json( "  }\n");
+    msg_json( "}\n");
 
     msg_debug( "Setting LED\n" );
     if ( flags.set_led == 1 )
